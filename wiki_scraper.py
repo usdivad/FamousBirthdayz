@@ -22,10 +22,11 @@ for day_offset in xrange(366):
 shuffle(days_arr)
 print days_arr
 for day in days_arr:
+    print day
     wiki_url = 'http://en.wikipedia.org/wiki/' + day
     wiki_req = requests.get(wiki_url)
     wiki_resp = wiki_req.text
-    filename = 'wiki/' + current_day_formatted + '.html'
+    filename = 'wiki/' + day + '.html'
     with open(filename, 'w') as f:
         f.write(wiki_resp)
     sleep(randint(1, 5))
