@@ -1,3 +1,6 @@
+'''
+One-time Wikipedia scraper
+'''
 import requests
 from datetime import date, timedelta
 from random import randint, shuffle
