@@ -1,8 +1,10 @@
-Happy F(ace)
+Famous Birthdayz
 ============
 
-Simple Facebook birthday bot that includes Wikipedia "on this day" facts.
+Twitter birthday bot that greets famous/historical/celebrity figures who were born on this day. Data drawn from Wikipedia.
+
+Previously Happy F(ace).
 
 Dependencies:
 - requests
-- facebook-sdk
+- tweepy
