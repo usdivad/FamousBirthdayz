@@ -5,6 +5,10 @@ Twitter birthday bot that greets famous/historical/celebrity figures who were bo
 
 Previously Happy F(ace).
 
+For cron on usdivad:
+        /usr/local/bin/python2.7 $HOME/famousbirthdayz/main.py
+
 Dependencies:
+- BeautifulSoup
 - requests
 - tweepy

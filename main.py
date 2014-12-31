@@ -61,7 +61,7 @@ for i in xrange(len(births)):
 # Choose subset of people based on time of day and how often posts are made
 # Because we use integer division for indices the last batch may have a couple entries lopped off
 # e.g. if len(people)=214 and POSTS_PER_DAY=8, unit=26, but 26*8=208!=214
-POSTS_PER_DAY = 8
+POSTS_PER_DAY = 24
 unit = len(people)/(POSTS_PER_DAY) #use integer division
 batch_count = int(POSTS_PER_DAY * (today.hour/24.))
 start = batch_count * unit
