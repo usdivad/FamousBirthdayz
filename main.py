@@ -73,43 +73,58 @@ end = start + unit #no need for - 1 here
 #     print '{}-{}'.format(str(start), str(end))
 
 # Construct the greeting!
+
 people = people[start:end]
-person = choice(people)
+greeting = 'This string is less than 140 characters long. It is still less than one hundred and forty characters long. But now this string\'s length > 140'
 
-age_first = True
-age_then_name = [
-    'A happy dapper {} birthday to {}!',
-    'Celebrating the {} birthday of {}!',
-    'Lucky number {}: here\'s to you, {}!',
-    'Happy {}, {}!',
-    'Happy {} birthday, {}!'
-    ]
+# Make sure it's < 140 chars...
+while len(greeting) > 140:
+    person = choice(people)
 
-name_then_age = [
-    'Today is {}\'s birthday! Happy {} birthday!',
-    'Happy birthday dear {}, happy {} birthday to you!',
-    '{}\'s {} birthday is today. YAY!',
-    'HEY! It\'s {}\'s {} birthday today! ',
-    'Time flies when it\'s {}\'s {} birthday!'
-    ]
-last_resort = 'Happy bday {}'
+    age_first = True
+    age_then_name = [
+        'A happy dapper {} birthday to {}!',
+        'Celebrating the {} birthday of {}!',
+        'Lucky number {}: here\'s to you, {}!',
+        'Happy {}, {}!',
+        'Happy {} birthday, {}!'
+        ]
 
-greetings = choice([age_then_name, name_then_age])
-if greetings == name_then_age:
-    age_first = False
-greeting = ''
+    name_then_age = [
+        'Today is {}\'s birthday! Happy {} birthday!',
+        'Happy birthday dear {}, happy {} birthday to you!',
+        '{}\'s {} birthday is today. YAY!',
+        'HEY! It\'s {}\'s {} birthday today! ',
+        'Time flies when it\'s {}\'s {} birthday!'
+        ]
+    last_resort = 'Happy bday {}'
 
-if age_first:
-    greeting = choice(greetings).format(add_suffix(str(person['age'])), person['name'])
-else:
-    greeting = choice(greetings).format(person['name'], add_suffix(str(person['age'])))
+    greetings = choice([age_then_name, name_then_age])
+    if greetings == name_then_age:
+        age_first = False
+    greeting = ''
 
-print greeting
+    if age_first:
+        greeting = choice(greetings).format(add_suffix(str(person['age'])), person['name'])
+    else:
+        greeting = choice(greetings).format(person['name'], add_suffix(str(person['age'])))
+
+    print greeting
+
 
 # TWITTER
-# # Authorize and post
-# keys = [line.rstrip('\n') for line in open('keys.txt')]
-# consumer_key = keys[0]
-# consumer_secret = keys[1]
-# access_key = keys[2]
-# access_secret = keys[3]
+# Authorize and post
+keys = [line.rstrip('\n') for line in open('keys.txt')]
+consumer_key = keys[0]
+consumer_secret = keys[1]
+access_key = keys[2]
+access_secret = keys[3]
+
+tweet_endpoint = 'https://api.twitter.com/1.1/statuses/update.json'
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+# redirect_url = auth.get_authorization_url()
+# verifier = requests.get('oauth_verifier')
+auth.set_access_token(access_key, access_secret)
+api = tweepy.API(auth)
+resp = api.update_status(greeting)
+print resp.id
