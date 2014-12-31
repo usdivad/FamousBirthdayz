@@ -1,4 +1,5 @@
 import datetime
+from random import choice
 import re
 
 from bs4 import BeautifulSoup
@@ -42,11 +43,15 @@ with open('wiki/' + today_formatted + '.html', 'r') as f:
 wiki_soup = BeautifulSoup(wiki_resp)
 uls = wiki_soup.select('#content > #bodyContent > #mw-content-text > ul')
 births = uls[1].select('li')
-re_yob = re.compile('\d+')
-re_name = re.compile('[\w ]*,')
+# print births
+# re_yob = re.compile('\d+')
+# re_name = re.compile('[\w+.* ]*,')
+re_yob = re.compile('(?<=a href="/wiki/)\d+')
+re_name = re.compile('(?<=">)\D.*?(?=</a>,)')
 people = []
 for i in xrange(len(births)):
-    birthtext = births[i].get_text()
+    # birthtext = births[i].get_text()
+    birthtext = str(births[i])
     years = re.findall(re_yob, birthtext)
     names = re.findall(re_name, birthtext)
     if len(years) > 0 and len(names) > 0:
@@ -68,8 +73,38 @@ end = start + unit #no need for - 1 here
 #     print '{}-{}'.format(str(start), str(end))
 
 # Construct the greeting!
-# for i in xrange(start, end):
+people = people[start:end]
+person = choice(people)
 
+age_first = True
+age_then_name = [
+    'A happy dapper {} birthday to {}!',
+    'Celebrating the {} birthday of {}!',
+    'Lucky number {}: here\'s to you, {}!',
+    'Happy {}, {}!',
+    'Happy {} birthday, {}!'
+    ]
+
+name_then_age = [
+    'Today is {}\'s birthday! Happy {} birthday!',
+    'Happy birthday dear {}, happy {} birthday to you!',
+    '{}\'s {} birthday is today. YAY!',
+    'HEY! It\'s {}\'s {} birthday today! ',
+    'Time flies when it\'s {}\'s {} birthday!'
+    ]
+last_resort = 'Happy bday {}'
+
+greetings = choice([age_then_name, name_then_age])
+if greetings == name_then_age:
+    age_first = False
+greeting = ''
+
+if age_first:
+    greeting = choice(greetings).format(add_suffix(str(person['age'])), person['name'])
+else:
+    greeting = choice(greetings).format(person['name'], add_suffix(str(person['age'])))
+
+print greeting
 
 # TWITTER
 # # Authorize and post
