@@ -1,6 +1,7 @@
 import datetime
 from random import choice
 import re
+import urllib
 
 from bs4 import BeautifulSoup
 import requests
@@ -48,14 +49,18 @@ births = uls[1].select('li')
 # re_name = re.compile('[\w+.* ]*,')
 re_yob = re.compile('(?<=a href="/wiki/)\d+')
 re_name = re.compile('(?<=">)\D.*?(?=</a>,)')
+re_link = re.compile('(?<=a href="/wiki/)\w+(?=")')
 people = []
 for i in xrange(len(births)):
     # birthtext = births[i].get_text()
     birthtext = str(births[i])
     years = re.findall(re_yob, birthtext)
     names = re.findall(re_name, birthtext)
+    links = re.findall(re_link, birthtext)
     if len(years) > 0 and len(names) > 0:
         person = {'age': today.year - int(years[0]), 'name': names[0]}
+        if len(links) > 1:
+            person['link'] = links[1]
         people.append(person)
 
 # Choose subset of people based on time of day and how often posts are made
@@ -76,6 +81,8 @@ end = start + unit #no need for - 1 here
 
 people = people[start:end]
 greeting = 'This string is less than 140 characters long. It is still less than one hundred and forty characters long. But now this string\'s length > 140'
+greeting = 'HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL'
+person = {}
 
 # Make sure it's < 140 chars...
 while len(greeting) > 140:
@@ -111,6 +118,28 @@ while len(greeting) > 140:
 
     print greeting
 
+# Get person's picture if available
+has_picture = False
+picture_filename = 'person.jpg'
+if 'link' in person:
+    person_endpoint = 'http://en.wikipedia.org/wiki/' + person['link']
+    person_req = requests.get(person_endpoint)
+    person_resp = person_req.text
+    person_soup = BeautifulSoup(person_resp)
+    person_infobox = person_soup.select('.infobox') #infobox biography vcard
+    # print person_infobox
+    if len(person_infobox) > 0:
+        re_picture = re.compile('(?<=src=")(.+?\.jpg|.+?\.png)(?=")', re.IGNORECASE)
+        picture_arr = re.findall(re_picture, str(person_infobox[0]))
+        if len(picture_arr) > 0:
+            print picture_arr
+            picture_url = 'http:' + picture_arr[0]
+            if 'png' in picture_url.lower():
+                picture_filename = 'person.png'
+            print picture_url
+            urllib.urlretrieve(picture_url, picture_filename)
+            print picture_url
+            has_picture = True
 
 # TWITTER
 # Authorize and post
@@ -126,5 +155,9 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 # verifier = requests.get('oauth_verifier')
 auth.set_access_token(access_key, access_secret)
 api = tweepy.API(auth)
-resp = api.update_status(greeting)
+resp = {'id': 'FAILED'}
+if has_picture:
+    resp = api.update_with_media(picture_filename, status=greeting)
+else:
+    resp = api.update_status(greeting)
 print resp.id
