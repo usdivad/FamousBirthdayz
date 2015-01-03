@@ -47,9 +47,9 @@ births = uls[1].select('li')
 # print births
 # re_yob = re.compile('\d+')
 # re_name = re.compile('[\w+.* ]*,')
-re_yob = re.compile('(?<=a href="/wiki/)\d+')
+re_yob = re.compile('(?<=>)\d+')
 re_name = re.compile('(?<=">)\D.*?(?=</a>,)')
-re_link = re.compile('(?<=a href="/wiki/)\w+(?=")')
+re_link = re.compile('(?<=a href="/wiki/).+?(?=")')
 people = []
 for i in xrange(len(births)):
     # birthtext = births[i].get_text()
@@ -59,8 +59,12 @@ for i in xrange(len(births)):
     links = re.findall(re_link, birthtext)
     if len(years) > 0 and len(names) > 0:
         person = {'age': today.year - int(years[0]), 'name': names[0]}
-        if len(links) > 1:
-            person['link'] = links[1]
+        if len(links) > 0:
+            if len(links) > 1:
+                person['link'] = links[1]
+            else:
+                person['link'] = links[0]
+            # print person['link'] + ' for ' + person['name']
         people.append(person)
 
 # Choose subset of people based on time of day and how often posts are made
@@ -79,8 +83,10 @@ end = start + unit #no need for - 1 here
 
 # Construct the greeting!
 
+# print len(people)
 people = people[start:end]
 # print people
+
 greeting = 'This string is less than 140 characters long. It is still less than one hundred and forty characters long. But now this string\'s length > 140'
 greeting = 'HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL'
 person = {}
