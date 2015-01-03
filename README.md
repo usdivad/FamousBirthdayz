@@ -7,9 +7,9 @@ Previously Happy F(ace).
 
 For cron on usdivad:
 
-    /usr/local/bin/python2.7 $HOME/famousbirthdayz/main.py
+    source $HOME/html/famousbirthdayz/run.sh
 
-Dependencies:
+Dependencies (install with virtualenv):
 - BeautifulSoup
 - requests
 - tweepy

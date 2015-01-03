@@ -30,15 +30,15 @@ today = datetime.datetime.now()
 today_formatted = today.strftime('%B_%d')
 
 # WIKIPEDIA
-# # Sending a request
-# wiki_endpoint = 'http://en.wikipedia.org/' + today_formatted
-# wiki_req = requests.get(wiki_url)
-# wiki_resp = wiki_req.text
+# Sending a request
+wiki_endpoint = 'http://en.wikipedia.org/wiki/' + today_formatted
+wiki_req = requests.get(wiki_endpoint)
+wiki_resp = wiki_req.text
 
-# Local files (good for testing)
-wiki_resp = ''
-with open('wiki/' + today_formatted + '.html', 'r') as f:
-   wiki_resp = f.read()
+# # Local files (good for testing)
+# wiki_resp = ''
+# with open('wiki/' + today_formatted + '.html', 'r') as f:
+#    wiki_resp = f.read()
 
 # Getting names and ages of people via BeautifulSoup
 wiki_soup = BeautifulSoup(wiki_resp)
@@ -80,6 +80,7 @@ end = start + unit #no need for - 1 here
 # Construct the greeting!
 
 people = people[start:end]
+# print people
 greeting = 'This string is less than 140 characters long. It is still less than one hundred and forty characters long. But now this string\'s length > 140'
 greeting = 'HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL HAPPY BIRTHDAY YA\'LL'
 person = {}
