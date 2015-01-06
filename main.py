@@ -71,16 +71,16 @@ for i in xrange(len(births)):
         desc = []
         words = descs[i].split(' ')
         for word in words:
-            if word.title() != word:
+            if word.title() != word and '(d' not in word:
                 desc.append(word)
         # descs[i] = ' '.join(desc)
-        descs[i] = ''.join(desc) #already formatted
-        print '#' + desc
+        descs[i] = re.sub('[\W\s_]', '', ''.join(desc)) #already formatted
+        print '#' + descs[i]
 
     # Automatically include first link
     if len(links) > 1:
         # desc = links[1].replace('_', ' ')
-        desc = links[1].replace('_', '') #already formatted
+        desc = re.sub('[\W\s_]', '', links[1]) #already formatted
         descs.insert(0, desc) #prepend
         print '#' + desc
 
@@ -173,6 +173,7 @@ while len(greeting) > 140:
         greeting_test = greeting + ' #' + person['descs'][ti]
         if len(greeting_test) <= 140:
             greeting = greeting_test
+        ti += 1
 
     print greeting
 
