@@ -7,6 +7,10 @@ from bs4 import BeautifulSoup
 import requests
 import tweepy
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 # Add suffix to a number, e.g. 123 -> 123rd
 def add_suffix(num):
     num_str = str(num)
@@ -71,18 +75,20 @@ for i in xrange(len(births)):
         desc = []
         words = descs[i].split(' ')
         for word in words:
-            if word.title() != word and '(d' not in word:
+            if word.title() != word and '(d' not in word and word not in prepositions:
                 desc.append(word)
         # descs[i] = ' '.join(desc)
         descs[i] = re.sub('[\W\s_]', '', ''.join(desc)) #already formatted
         print '#' + descs[i]
 
     # Automatically include first link
+    print links
     if len(links) > 1:
-        # desc = links[1].replace('_', ' ')
-        desc = re.sub('[\W\s_]', '', links[1]) #already formatted
-        descs.insert(0, desc) #prepend
-        print '#' + desc
+        for link in links[1:]:
+            # desc = link.replace('_', ' ')
+            desc = re.sub('[\W\s_]', '', link) #already formatted
+            descs.insert(0, desc) #prepend
+            print '#' + desc
 
     if len(years) > 0 and len(names) > 0:
         person = {'age': today.year - int(years[0]), 'name': names[0]}
@@ -189,18 +195,24 @@ if 'link' in person:
     person_soup = BeautifulSoup(person_resp)
     person_infobox = person_soup.select('.infobox') #infobox biography vcard
     # print person_infobox
+    picture_arr = []
     if len(person_infobox) > 0:
         re_picture = re.compile('(?<=src=")(.+?\.jpg|.+?\.png)(?=")', re.IGNORECASE)
         picture_arr = re.findall(re_picture, str(person_infobox[0]))
-        if len(picture_arr) > 0:
-            print picture_arr
-            picture_url = 'http:' + picture_arr[0]
-            if 'png' in picture_url.lower():
-                picture_filename = 'person.png'
-            print picture_url
-            urllib.urlretrieve(picture_url, picture_filename)
-            print picture_url
-            has_picture = True
+    else:
+        re_picture = re.compile('(?<=src=").+?\.jpg(?=")', re.IGNORECASE)
+        picture_arr = re.findall(re_picture, str(person_soup))
+        
+    if len(picture_arr) > 0:
+        print picture_arr
+        picture_url = 'http:' + picture_arr[0]
+        if 'png' in picture_url.lower():
+            picture_filename = 'person.png'
+        print picture_url
+        urllib.urlretrieve(picture_url, picture_filename)
+        print picture_url
+        has_picture = True
+
 
 # # ... using Bing
 # bing_endpoint = 'http://www.bing.com/' + person['name']
@@ -217,9 +229,9 @@ if 'link' in person:
 #     has_picture = True
 
 # TWITTER post
-resp = {'id': 'FAILED'}
-if has_picture:
-    resp = api.update_with_media(picture_filename, status=greeting)
-else:
-    resp = api.update_status(greeting)
-print resp.id
+# resp = {'id': 'FAILED'}
+# if has_picture:
+#     resp = api.update_with_media(picture_filename, status=greeting)
+# else:
+#     resp = api.update_status(greeting)
+# print resp.id
