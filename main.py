@@ -53,16 +53,21 @@ births = uls[1].select('li')
 # re_name = re.compile('[\w+.* ]*,')
 re_yob = re.compile('(?<=>)\d+')
 re_name = re.compile('(?<=">)\D.*?(?=</a>,)')
-re_link = re.compile('(?<= <a href="/wiki/).+?(?=")')
+re_link = re.compile('(?<= <a href="/wiki/).+?(?=")') #blocks years but doesn't capture "mw-redirect"s
+# re_link = re.compile('(?<= href="/wiki/).+?(?=")') #captures all
+re_redirect = re.compile('(?<=redirect" href="/wiki/).+?(?=")')
 prepositions = ['and', 'of', 'in', 'for']
 
 people = []
 for i in xrange(len(births)):
     birthtext_text = births[i].get_text()
     birthtext = str(births[i])
+    # print birthtext
     years = re.findall(re_yob, birthtext)
     names = re.findall(re_name, birthtext)
     links = re.findall(re_link, birthtext)
+    redirects = re.findall(re_redirect, birthtext)
+    links.extend(redirects)
 
     # Getting descs, some rudimentary NLP
     # Example: Charles Xavier, British psychic and philanthropist, founder of X-Men
@@ -79,7 +84,7 @@ for i in xrange(len(births)):
                 desc.append(word)
         # descs[i] = ' '.join(desc)
         descs[i] = re.sub('[\W\s_]', '', ''.join(desc)) #already formatted
-        print '#' + descs[i]
+        # print '#' + descs[i]
 
     # Automatically include first link
     print links
@@ -88,8 +93,10 @@ for i in xrange(len(births)):
             # desc = link.replace('_', ' ')
             desc = re.sub('[\W\s_]', '', link) #already formatted
             descs.insert(0, desc) #prepend
-            print '#' + desc
+            # print '#' + desc
 
+
+    # Create person
     if len(years) > 0 and len(names) > 0:
         person = {'age': today.year - int(years[0]), 'name': names[0]}
         if len(links) > 0:
@@ -202,7 +209,7 @@ if 'link' in person:
     else:
         re_picture = re.compile('(?<=src=").+?\.jpg(?=")', re.IGNORECASE)
         picture_arr = re.findall(re_picture, str(person_soup))
-        
+
     if len(picture_arr) > 0:
         print picture_arr
         picture_url = 'http:' + picture_arr[0]
@@ -229,9 +236,9 @@ if 'link' in person:
 #     has_picture = True
 
 # TWITTER post
-# resp = {'id': 'FAILED'}
-# if has_picture:
-#     resp = api.update_with_media(picture_filename, status=greeting)
-# else:
-#     resp = api.update_status(greeting)
-# print resp.id
+resp = {'id': 'FAILED'}
+if has_picture:
+    resp = api.update_with_media(picture_filename, status=greeting)
+else:
+    resp = api.update_status(greeting)
+print resp.id
