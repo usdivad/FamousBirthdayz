@@ -138,6 +138,8 @@ person = {}
 # Make sure it's < 140 chars...
 while len(greeting) > 140:
     person = choice(people)
+    add_tags = True
+    ti = 0 #tag index
 
     age_first = True
     age_then_name = [
@@ -166,6 +168,11 @@ while len(greeting) > 140:
         greeting = choice(greetings).format(add_suffix(str(person['age'])), person['name'])
     else:
         greeting = choice(greetings).format(person['name'], add_suffix(str(person['age'])))
+
+    while len(greeting) < 140 and ti < len(person['descs']):
+        greeting_test = greeting + ' #' + person['descs'][ti]
+        if len(greeting_test) <= 140:
+            greeting = greeting_test
 
     print greeting
 
