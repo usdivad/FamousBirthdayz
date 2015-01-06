@@ -49,22 +49,51 @@ births = uls[1].select('li')
 # re_name = re.compile('[\w+.* ]*,')
 re_yob = re.compile('(?<=>)\d+')
 re_name = re.compile('(?<=">)\D.*?(?=</a>,)')
-re_link = re.compile('(?<=a href="/wiki/).+?(?=")')
+re_link = re.compile('(?<= <a href="/wiki/).+?(?=")')
+prepositions = ['and', 'of', 'in', 'for']
+
 people = []
 for i in xrange(len(births)):
-    # birthtext = births[i].get_text()
+    birthtext_text = births[i].get_text()
     birthtext = str(births[i])
     years = re.findall(re_yob, birthtext)
     names = re.findall(re_name, birthtext)
     links = re.findall(re_link, birthtext)
+
+    # Getting descs, some rudimentary NLP
+    # Example: Charles Xavier, British psychic and philanthropist, founder of X-Men
+    # 1934 - Phil Ramone, South African-American record producer and DJ, co-founded A & R Recording (d. 2013)
+    phrases = birthtext_text.split(',')[1:] #first element is year+name
+    descs = []
+    for phrase in phrases:
+        descs.extend(phrase.split(' and '))
+    for i in xrange(len(descs)):
+        desc = []
+        words = descs[i].split(' ')
+        for word in words:
+            if word.title() != word:
+                desc.append(word)
+        # descs[i] = ' '.join(desc)
+        descs[i] = ''.join(desc) #already formatted
+        print '#' + desc
+
+    # Automatically include first link
+    if len(links) > 1:
+        # desc = links[1].replace('_', ' ')
+        desc = links[1].replace('_', '') #already formatted
+        descs.insert(0, desc) #prepend
+        print '#' + desc
+
     if len(years) > 0 and len(names) > 0:
         person = {'age': today.year - int(years[0]), 'name': names[0]}
         if len(links) > 0:
-            if len(links) > 1:
-                person['link'] = links[1]
-            else:
-                person['link'] = links[0]
+            person['link'] = links[0]
+            # if len(links) > 1:
+            #     person['link'] = links[1]
+            # else:
+            #     person['link'] = links[0]
             # print person['link'] + ' for ' + person['name']
+        person['descs'] = descs
         people.append(person)
 
 # Choose subset of people based on time of day and how often posts are made
@@ -80,6 +109,21 @@ end = start + unit #no need for - 1 here
 #     start = i * unit
 #     end = start + unit - 1
 #     print '{}-{}'.format(str(start), str(end))
+
+# TWITTER authorize
+keys = [line.rstrip('\n') for line in open('keys.txt')]
+consumer_key = keys[0]
+consumer_secret = keys[1]
+access_key = keys[2]
+access_secret = keys[3]
+
+tweet_endpoint = 'https://api.twitter.com/1.1/statuses/update.json'
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+# redirect_url = auth.get_authorization_url()
+# verifier = requests.get('oauth_verifier')
+auth.set_access_token(access_key, access_secret)
+api = tweepy.API(auth)
+
 
 # Construct the greeting!
 
@@ -128,6 +172,8 @@ while len(greeting) > 140:
 # Get person's picture if available
 has_picture = False
 picture_filename = 'person.jpg'
+
+# ... using Wikipedia
 if 'link' in person:
     person_endpoint = 'http://en.wikipedia.org/wiki/' + person['link']
     person_req = requests.get(person_endpoint)
@@ -148,20 +194,21 @@ if 'link' in person:
             print picture_url
             has_picture = True
 
-# TWITTER
-# Authorize and post
-keys = [line.rstrip('\n') for line in open('keys.txt')]
-consumer_key = keys[0]
-consumer_secret = keys[1]
-access_key = keys[2]
-access_secret = keys[3]
+# # ... using Bing
+# bing_endpoint = 'http://www.bing.com/' + person['name']
+# bing_req = requests.get(bing_endpoint)
+# bing_resp = bing_req.text
+# print bing_resp
+# re_picture = re.compile('http://.+?\.jpg')
+# picture_arr = re.findall(re_picture, bing_resp)
+# if len(picture_arr) > 0:
+#     print picture_arr
+#     picture_url = picture_arr[0]
+#     urllib.urlretrieve(picture_url, picture_filename)
+#     print picture_url
+#     has_picture = True
 
-tweet_endpoint = 'https://api.twitter.com/1.1/statuses/update.json'
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-# redirect_url = auth.get_authorization_url()
-# verifier = requests.get('oauth_verifier')
-auth.set_access_token(access_key, access_secret)
-api = tweepy.API(auth)
+# TWITTER post
 resp = {'id': 'FAILED'}
 if has_picture:
     resp = api.update_with_media(picture_filename, status=greeting)
